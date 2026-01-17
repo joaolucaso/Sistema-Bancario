@@ -3,12 +3,12 @@ package com.banco.application.service;
 import com.banco.domain.conta.exeption.ContaNaoEncontradaException;
 import com.banco.domain.conta.exeption.SaldoInsulficienteException;
 import com.banco.domain.conta.exeption.ValorInvalidoException;
+import com.banco.domain.conta.historico.model.Historico;
 import com.banco.domain.conta.model.Conta;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 
 @Service
@@ -22,7 +22,8 @@ public class ContaService {
 
 
     public Conta cadastrar(Conta conta) {
-        conta.setNumero(contas.size()+1);
+        conta.setNumero(contas.size() + 1);
+        Historico.cadastro(conta);
         contas.add(conta);
         return conta;
     }
@@ -30,6 +31,7 @@ public class ContaService {
     public Conta depositar(int numeroConta, BigDecimal valor) {
         Conta conta = buscar(numeroConta);
         validarDeposito(conta, valor);
+        Historico.deposito(conta, valor);
         conta.depositar(valor);
         return conta;
 
@@ -38,6 +40,7 @@ public class ContaService {
     public Conta sacar(int numeroConta, BigDecimal valor) {
         Conta conta = buscar(numeroConta);
         validarSaque(conta, valor);
+        Historico.saque(conta, valor);
         conta.sacar(valor);
         return conta;
 
@@ -49,7 +52,7 @@ public class ContaService {
         validarTransferencia(remetente, destinatario, valor);
         remetente.sacar(valor);
         destinatario.depositar(valor);
-
+        Historico.transferencia(remetente, destinatario,valor);
 
     }
 
@@ -61,7 +64,7 @@ public class ContaService {
         } else {
             conta.ativar();
         }
-
+        Historico.alterarAtivo(conta);
         return conta;
 
     }

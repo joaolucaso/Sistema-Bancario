@@ -30,13 +30,20 @@ public class BancoApplication {
     public void run() {
         Cliente joao = new Cliente("joao");
         Cliente maria = new Cliente("maria");
+
         Conta contaJoao = new Conta(joao, BigDecimal.valueOf(1000));
         Conta contamaria = new Conta(maria, BigDecimal.valueOf(1000));
 
 contaService.cadastrar(contaJoao);
 contaService.cadastrar(contamaria);
-contaService.alterarAtivo(1);
+
+contaService.trasnferir(1,2,BigDecimal.valueOf(1000));
+
+
+
+
         System.out.println(contaService.buscar(1));
-        System.out.println(contaService.buscar(2));
+
+
     }
 }

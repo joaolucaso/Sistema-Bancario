@@ -1,12 +1,14 @@
 package com.banco.domain.conta.model;
 
 import com.banco.domain.conta.cliente.model.Cliente;
+import com.banco.domain.conta.historico.model.Historico;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.LinkedList;
 
 @Getter
 @Setter
@@ -15,44 +17,46 @@ import java.math.BigDecimal;
 public class Conta {
 
 
-    public Conta(Cliente cliente,BigDecimal saldo ) {
+    private int numero;
+    private Cliente cliente;
+    private BigDecimal saldo;
+    private LinkedList<Historico> historicos;
+    private boolean ativo;
+
+
+    public Conta(Cliente cliente, BigDecimal saldo) {
         this.cliente = cliente;
         this.saldo = saldo;
         this.ativo = true;
 
     }
 
-    private int numero;
-    private Cliente cliente;
-    private BigDecimal saldo;
-    private boolean ativo;
-
-
     public void sacar(BigDecimal valor) {
-        if (valor.compareTo(BigDecimal.ZERO) <= 0) {
-            // Throw
 
-        }
-        if (saldo.compareTo(valor) < 0) {
-            // Throw
-
-        }
-        saldo = saldo.subtract(valor);
+        this.saldo = saldo.subtract(valor);
     }
 
     public void depositar(BigDecimal valor) {
 
-        saldo = saldo.add(valor);
+        this.saldo = saldo.add(valor);
+    }
+
+    public void ativar() {
+        this.ativo = true;
     }
 
     public void desativar() {
         this.ativo = false;
 
-
     }
 
-    public void ativar() {
-        this.ativo = true;
+    public void addHistorico(Historico historico) {
+        if (historicos == null) {
+            historicos = new LinkedList<>();
+
+        }
+
+        this.historicos.add(historico);
     }
 
     @Override
@@ -61,6 +65,7 @@ public class Conta {
                 "numero=" + numero +
                 ", cliente=" + cliente +
                 ", saldo=" + saldo +
+                ", historicos=" + Arrays.toString(historicos.toArray())  +
                 ", ativo=" + ativo +
                 '}';
     }
