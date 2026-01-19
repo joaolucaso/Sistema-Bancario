@@ -1,10 +1,14 @@
 package com.banco.application.service;
 
+import com.banco.domain.conta.exeption.ContaInativaException;
 import com.banco.domain.conta.exeption.ContaNaoEncontradaException;
 import com.banco.domain.conta.exeption.SaldoInsulficienteException;
 import com.banco.domain.conta.exeption.ValorInvalidoException;
 import com.banco.domain.conta.historico.model.Historico;
 import com.banco.domain.conta.model.Conta;
+import com.banco.infrastructure.utils.LogBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -14,14 +18,21 @@ import java.util.List;
 @Service
 public class ContaService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContaService.class);
+
     private List<Conta> contas;
 
     public ContaService() {
-        this.contas = new ArrayList<Conta>();
+        this.contas = new ArrayList<>();
     }
 
 
     public Conta cadastrar(Conta conta) {
+        LOGGER.info(LogBuilder.of()
+                .header("iniciando cadastro da conta")
+                .row("conta", conta)
+                .build());
+
         conta.setNumero(contas.size() + 1);
         Historico.cadastro(conta);
         contas.add(conta);
@@ -46,14 +57,18 @@ public class ContaService {
 
     }
 
-    public void trasnferir(int numeroContaRemetente, int numeroContaDestinatario, BigDecimal valor) {
+    public Conta trasnferir(int numeroContaRemetente,
+                            int numeroContaDestinatario,
+                            BigDecimal valor) {
+
         Conta remetente = buscar(numeroContaRemetente);
         Conta destinatario = buscar(numeroContaDestinatario);
         validarTransferencia(remetente, destinatario, valor);
         remetente.sacar(valor);
         destinatario.depositar(valor);
-        Historico.transferencia(remetente, destinatario,valor);
+        Historico.transferencia(remetente, destinatario, valor);
 
+        return remetente;
     }
 
 
@@ -83,6 +98,11 @@ public class ContaService {
     }
 
     private void validarSaque(Conta conta, BigDecimal valor) {
+        if (!conta.isAtivo()) {
+            throw new ContaInativaException(conta.getNumero());
+
+        }
+
         if (valor.compareTo(BigDecimal.ZERO) <= 0) {
             throw new ValorInvalidoException(valor);
 
@@ -96,13 +116,28 @@ public class ContaService {
     }
 
     private void validarDeposito(Conta conta, BigDecimal valor) {
+        if (!conta.isAtivo()) {
+
+            throw new ContaInativaException(conta.getNumero());
+        }
+
         if (valor.compareTo(BigDecimal.ZERO) <= 0) {
             throw new ValorInvalidoException(valor);
 
         }
     }
 
-    private void validarTransferencia(Conta remetente, Conta destinatario, BigDecimal valor) {
+    private void validarTransferencia(Conta remetente,
+                                      Conta destinatario,
+                                      BigDecimal valor) {
+
+        if (!remetente.isAtivo()) {
+            throw new ContaInativaException(remetente.getNumero());
+        }
+        if (!destinatario.isAtivo()) {
+            throw new ContaInativaException(destinatario.getNumero());
+        }
+
         if (valor.compareTo(BigDecimal.ZERO) <= 0) {
             throw new ValorInvalidoException(valor);
         }

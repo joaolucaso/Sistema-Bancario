@@ -77,7 +77,7 @@ public class Historico {
 
     public static Historico alterarAtivo(Conta remetente) {
         Historico historico = new Historico(remetente, null, TipoOperacao.ALTERAR_ATIVO, String.format
-                (MENSGEM_TRANSFERENCIA, remetente.isAtivo()));
+                (MENSGEM_ALTERACAO_ATIVO, remetente.isAtivo()));
         remetente.addHistorico(historico);
         return historico;
     }

@@ -28,7 +28,7 @@ public class Conta {
         this.cliente = cliente;
         this.saldo = saldo;
         this.ativo = true;
-
+        this.historicos = new LinkedList<>();
     }
 
     public void sacar(BigDecimal valor) {
@@ -57,6 +57,9 @@ public class Conta {
         }
 
         this.historicos.add(historico);
+    }
+    public Historico[] getHistoricos() {
+        return historicos.toArray(new Historico[0]);
     }
 
     @Override
