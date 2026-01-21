@@ -2,8 +2,10 @@ package com.banco;
 
 import com.banco.application.service.ContaService;
 import com.banco.domain.conta.cliente.model.Cliente;
-import com.banco.domain.conta.exeption.ValorInvalidoException;
 import com.banco.domain.conta.model.Conta;
+import com.banco.infrastructure.utils.LogBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -14,6 +16,8 @@ import java.util.Scanner;
 
 @SpringBootApplication
 public class BancoApplication {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BancoApplication.class);
+
     private Scanner scan;
     private ContaService contaService;
 
@@ -35,10 +39,12 @@ public class BancoApplication {
     public void run() {
         clear();
         try {
-
             menuPrincipal();
         } catch (Exception exception) {
-            System.out.println(exception.getMessage());
+            LOGGER.error(LogBuilder.of()
+                    .header("Um erro aconteceu")
+                    .row("erro", exception.getMessage()).build());
+
         }
     }
 
@@ -90,14 +96,13 @@ public class BancoApplication {
 
                 }
             } catch (Exception exception) {
-                if (exception.getMessage() != null) {
-                    System.out.println(exception.getMessage());
-                } else
-                    System.out.println(exception);
+                LOGGER.error(LogBuilder.of()
+                        .header("Um erro aconteceu")
+                        .row("erro", exception.getMessage()).build());
+
+                aguardarEnter();
             }
-            aguardarEnter();
-        }
-        while (!opcao.equals("q"));
+        } while (!opcao.equals("q"));
     }
 
     private void menuCadastrar() {
