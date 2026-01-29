@@ -21,18 +21,16 @@ public class BancoApplication {
     private Scanner scan;
     private ContaService contaService;
 
-    public BancoApplication(ContaService contaService) {
-        this.contaService = contaService;
-        this.scan = new Scanner(System.in);
-
-    }
+//    public BancoApplication(ContaService contaService) {
+//        this.contaService = contaService;
+//        this.scan = new Scanner(System.in);
+//
+//    }
 
 
     public static void main(String[] args) {
 
         ApplicationContext app = SpringApplication.run(BancoApplication.class, args);
-        BancoApplication bancoApplication = app.getBean(BancoApplication.class);
-        bancoApplication.run();
 
     }
 
@@ -120,7 +118,7 @@ public class BancoApplication {
         Conta conta = new Conta(cliente, valor);
         conta = contaService.cadastrar(conta);
         System.out.println("Conta Cadastrada!");
-        System.out.println(String.format("Número: %d, Nome: %s, Saldo: R$ %.2f", conta.getNumero(),
+        System.out.println(String.format("Número: %d, Nome: %s, Saldo: R$ %.2f", conta.getId(),
                 conta.getCliente().getNome(), conta.getSaldo()));
         aguardarEnter();
 

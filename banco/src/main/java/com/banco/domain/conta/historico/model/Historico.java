@@ -2,6 +2,7 @@ package com.banco.domain.conta.historico.model;
 
 import com.banco.domain.conta.model.Conta;
 import com.banco.application.service.ContaService;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,8 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Entity
+@Table(name = "t_historico")
 public class Historico {
 
     private static final String MENSGEM_CADASTRO = "Cadastrou a conta com R$ %s";
@@ -19,11 +22,23 @@ public class Historico {
     private static final String MENSGEM_TRANSFERENCIA = "Trasferiu R$ %s de %d para %d  ";
     private static final String MENSGEM_ALTERACAO_ATIVO = "Alterou o ativo para %s";
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    @ManyToOne
+    @JoinColumn(name ="id_remetente")
     private Conta remetente;
+
+    @ManyToOne
+    @JoinColumn(name ="id_destinatario")
     private Conta destinatario;
+
+@Enumerated(EnumType.STRING)
     private TipoOperacao tipoOperacao;
+
     private String descricao;
+
     private LocalDateTime dataCadastro;
 
     private Historico() {
@@ -59,19 +74,11 @@ public class Historico {
     }
 
     public static Historico transferencia(Conta remetente,Conta destinatario,  BigDecimal valor) {
-        Historico historicoRemetente = new Historico(remetente, null, TipoOperacao.TRANSFERENCIA,
-                String.format("Transferiu R$ %s para %d", valor, destinatario.getNumero()
-                )
-        );
-
-
-        Historico historicoDestinatario = new Historico(destinatario, null, TipoOperacao.TRANSFERENCIA,
-                String.format("Recebeu R$ %s de %d", valor, remetente.getNumero()));
-
-
-        remetente.addHistorico(historicoRemetente);
-        destinatario.addHistorico(historicoDestinatario);
-        return historicoRemetente;
+        Historico historico = new Historico(remetente, destinatario, TipoOperacao.TRANSFERENCIA,
+                String.format(MENSGEM_TRANSFERENCIA, valor, remetente.getId(), destinatario.getId()));
+        remetente.addHistorico(historico);
+       destinatario.addHistorico(historico);
+        return historico;
     }
 
 

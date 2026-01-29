@@ -2,25 +2,39 @@ package com.banco.domain.conta.model;
 
 import com.banco.domain.conta.cliente.model.Cliente;
 import com.banco.domain.conta.historico.model.Historico;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = "t_conta")
 
 public class Conta {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private int numero;
+    @OneToOne(cascade =CascadeType.ALL)
     private Cliente cliente;
+
     private BigDecimal saldo;
-    private LinkedList<Historico> historicos;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<Historico> historicos = new ArrayList<>();
+
     private boolean ativo;
 
 
@@ -58,6 +72,7 @@ public class Conta {
 
         this.historicos.add(historico);
     }
+
     public Historico[] getHistoricos() {
         return historicos.toArray(new Historico[0]);
     }
@@ -65,10 +80,10 @@ public class Conta {
     @Override
     public String toString() {
         return "Conta{" +
-                "numero=" + numero +
+                "id=" + id +
                 ", cliente=" + cliente +
                 ", saldo=" + saldo +
-                ", historicos=" + Arrays.toString(historicos.toArray())  +
+                ", historicos=" + Arrays.toString(historicos.toArray()) +
                 ", ativo=" + ativo +
                 '}';
     }
