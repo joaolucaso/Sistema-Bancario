@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -15,7 +14,5 @@ import java.math.BigDecimal;
 public class ClienteRequest {
 
     private String nome;
-    private BigDecimal saldo;
-
 
 }

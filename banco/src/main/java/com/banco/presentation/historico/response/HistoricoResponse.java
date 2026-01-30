@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HistoricoResponse {
-    private Historico.TipoOperacao tipoOperacao;
+    private String tipoOperacao;
 
     private String descricao;
 
