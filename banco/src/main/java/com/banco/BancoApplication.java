@@ -129,7 +129,7 @@ public class BancoApplication {
 
         System.out.println("Depositar");
         System.out.println("Número da Conta: ");
-        int numero = scan.nextInt();
+        Long numero = scan.nextLong();
 
         System.out.println("Valor: ");
 
@@ -166,11 +166,11 @@ public class BancoApplication {
         System.out.println("Transferir");
 
         System.out.println("Numero da Conta  remetente: ");
-        int numeroRemetente = scan.nextInt();
+        Long numeroRemetente = scan.nextLong();
 
 
         System.out.println("Numero da Conta  do Destinatario: ");
-        int numeroDestinatario = scan.nextInt();
+        Long numeroDestinatario = scan.nextLong();
 
         System.out.println("Valor: ");
         BigDecimal valor = BigDecimal.valueOf(scan.nextDouble());
@@ -190,7 +190,7 @@ public class BancoApplication {
 
 
         System.out.println("Numero da Conta : ");
-        int numero = scan.nextInt();
+        Long numero = scan.nextLong();
         Conta conta = contaService.alterarAtivo(numero);
 
         System.out.println("alteração realizada!");

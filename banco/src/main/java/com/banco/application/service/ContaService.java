@@ -49,7 +49,7 @@ public class ContaService {
     }
 
     @Transactional
-    public Conta depositar(int numeroConta, BigDecimal valor) {
+    public Conta depositar(Long numeroConta, BigDecimal valor) {
         Conta conta = buscar(numeroConta);
         validarDeposito(conta, valor);
         Historico.deposito(conta, valor);
@@ -70,8 +70,8 @@ public class ContaService {
     }
 
     @Transactional
-    public Conta trasnferir(int numeroContaRemetente,
-                            int numeroContaDestinatario,
+    public Conta trasnferir(Long numeroContaRemetente,
+                            Long numeroContaDestinatario,
                             BigDecimal valor) {
 
         Conta remetente = buscar(numeroContaRemetente);
@@ -90,7 +90,7 @@ public class ContaService {
     }
 
     @Transactional
-    public Conta alterarAtivo(int numeroConta) {
+    public Conta alterarAtivo(Long numeroConta) {
         Conta conta = buscar(numeroConta);
         if (conta.isAtivo()) {
             conta.desativar();
