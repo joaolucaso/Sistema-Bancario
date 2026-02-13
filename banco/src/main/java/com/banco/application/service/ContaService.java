@@ -10,6 +10,10 @@ import com.banco.infrastructure.utils.LogBuilder;
 import com.banco.infrastructure.utils.repository.conta.ContaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +26,7 @@ public class ContaService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ContaService.class);
 
+    private static final int TAXA_JUROS_ANUAL = 24;
     private final ContaRepository contaRepository;
 
     public ContaService(ContaRepository contaRepository) {
@@ -102,9 +107,52 @@ public class ContaService {
 
     }
 
+
+    @Transactional
+    public void rendaFixa() {
+
+        int pageSize = 2;
+
+        PageRequest pageRequest = PageRequest.of(0, pageSize, Sort.Direction.ASC,"id");
+        Page<Conta> contas = buscarTodosAtivos(pageRequest);
+
+        if (!contas.isEmpty()) {
+
+            do {
+                LOGGER.info(LogBuilder.of()
+                        .header("processando pagina")
+                        .row("Pagina", pageRequest.getPageNumber())
+                        .build());
+
+                for (Conta conta : contas) {
+                    conta.adicionarValorPorPorcentagem(TAXA_JUROS_ANUAL / 12);
+                }
+
+                contaRepository.saveAll(contas);
+                pageRequest = PageRequest.of(pageRequest.getPageNumber() + 1, pageSize, Sort.Direction.ASC,"id");
+                contas = buscarTodosAtivos(pageRequest);
+            } while (!contas.isEmpty());
+
+        }
+        LOGGER.info(LogBuilder.of()
+                .header("Finalizando processamento paginado da renda fixa")
+                .build());
+    }
+
+
     @Transactional(readOnly = true)
-    public List<Conta> buscarTodos() {
-        return contaRepository.findAll();
+    public List<Conta> buscarTodosAtivos() {
+        return contaRepository.buscarTodosAtivos();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Conta> buscarTodosAtivos(Pageable pageable) {
+        return contaRepository.buscarTodosAtivos(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Conta> buscarTodos(Pageable pageable) {
+        return contaRepository.buscarTodos(pageable);
     }
 
     @Transactional(readOnly = true)

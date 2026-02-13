@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 
@@ -19,6 +20,7 @@ public class Historico {
     private static final String MENSGEM_CADASTRO = "Cadastrou a conta com R$ %s";
     private static final String MENSGEM_SAQUE = "Sacou R$ %s";
     private static final String MENSGEM_DEPOSITO = "Depositou R$ %s";
+    private static final String MENSGEM_RENDA_FIXA = "Recebeu R$ %s de juros";
     private static final String MENSGEM_TRANSFERENCIA = "Trasferiu R$ %s de %d para %d  ";
     private static final String MENSGEM_ALTERACAO_ATIVO = "Alterou o ativo para %s";
 
@@ -27,14 +29,14 @@ public class Historico {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name ="id_remetente")
+    @JoinColumn(name = "id_remetente")
     private Conta remetente;
 
     @ManyToOne
-    @JoinColumn(name ="id_destinatario")
+    @JoinColumn(name = "id_destinatario")
     private Conta destinatario;
 
-@Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private TipoOperacao tipoOperacao;
 
     private String descricao;
@@ -73,11 +75,19 @@ public class Historico {
         return historico;
     }
 
-    public static Historico transferencia(Conta remetente,Conta destinatario,  BigDecimal valor) {
+    public static Historico transferencia(Conta remetente, Conta destinatario, BigDecimal valor) {
         Historico historico = new Historico(remetente, destinatario, TipoOperacao.TRANSFERENCIA,
                 String.format(MENSGEM_TRANSFERENCIA, valor, remetente.getId(), destinatario.getId()));
         remetente.addHistorico(historico);
-       destinatario.addHistorico(historico);
+        destinatario.addHistorico(historico);
+        return historico;
+    }
+
+    public static Historico rendaFixa(Conta remetente, BigDecimal valor) {
+        Historico historico = new Historico(remetente, null, TipoOperacao.RENDA_FIXA,
+                String.format(MENSGEM_RENDA_FIXA, valor.setScale(2, RoundingMode.HALF_UP)));
+        remetente.addHistorico(historico);
+
         return historico;
     }
 
@@ -105,6 +115,7 @@ public class Historico {
         SAQUE("saque"),
         DEPOSITO("deposito"),
         TRANSFERENCIA("trasferencia"),
+        RENDA_FIXA("renda fixa"),
         ALTERAR_ATIVO("Alterar ativo");
         private String label;
 
