@@ -19,7 +19,11 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String nome;
+
+    private String senha;
+
 
     @Override
     public String toString() {

@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,12 +52,11 @@ public class ContaController {
     }
 
     @PostMapping("depositar")
-    public ResponseEntity<?> depositar(@RequestBody DepositoRequest depositoRequest) {
+    public ResponseEntity<?> depositar(@RequestBody DepositoRequest depositoRequest,Principal principal) {
         Conta conta = null;
 
         try {
-            conta = contaService.depositar(depositoRequest.getIdConta(),
-                    depositoRequest.getValor());
+            conta = contaService.depositar(principal.getName(), depositoRequest.getValor());
         } catch (ContaNaoEncontradaException contaNaoEncontradaException) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(contaNaoEncontradaException.getMessage());
         } catch (Exception exception) {
@@ -68,11 +68,11 @@ public class ContaController {
     }
 
     @PostMapping("sacar")
-    public ResponseEntity<?> sacar(@RequestBody SaqueRequest saqueRequest) {
+    public ResponseEntity<?> sacar(@RequestBody SaqueRequest saqueRequest,Principal principal) {
         Conta conta = null;
 
         try {
-            conta = contaService.depositar(saqueRequest.getIdConta(),
+            conta = contaService.depositar(principal.getName(),
                     saqueRequest.getValor());
         } catch (ContaNaoEncontradaException contaNaoEncontradaException) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(contaNaoEncontradaException.getMessage());
@@ -117,12 +117,12 @@ public class ContaController {
 
     }
 
-    @GetMapping("buscar/{id}")
-    public ResponseEntity<?> buscarconta(@PathVariable("id") long idConta) {
+    @GetMapping("buscar")
+    public ResponseEntity<?> buscarconta(Principal principal) {
         Conta conta = null;
 
         try {
-            conta = contaService.buscar(idConta);
+            conta = contaService.buscar(principal.getName());
         } catch (ContaNaoEncontradaException contaNaoEncontradaException) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(contaNaoEncontradaException.getMessage());
         } catch (Exception exception) {
@@ -133,7 +133,7 @@ public class ContaController {
 
     }
 
-    @GetMapping("buscar")
+    @GetMapping("buscar-todos")
     public ResponseEntity<Page<?>> buscarTodos(Pageable pageable) {
         Page<Conta> contas = null;
         Page<?> response;

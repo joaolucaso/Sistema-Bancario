@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,24 +26,33 @@ import java.util.Optional;
 public class ContaService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ContaService.class);
-
+    private final PasswordEncoder passwordEncoder;
     private static final int TAXA_JUROS_ANUAL = 24;
     private final ContaRepository contaRepository;
 
-    public ContaService(ContaRepository contaRepository) {
-
+    public ContaService(ContaRepository contaRepository,
+                        PasswordEncoder passwordEncoder) {
         this.contaRepository = contaRepository;
+        this.passwordEncoder = passwordEncoder;
     }
+
 
     @Transactional
     public Conta cadastrar(Conta conta) {
+
         LOGGER.info(LogBuilder.of()
                 .header("iniciando cadastro da conta")
                 .row("conta", conta)
                 .build());
-        conta.ativar();
 
+        conta.ativar();
         Historico.cadastro(conta);
+
+        String senhaCriptografada =
+                passwordEncoder.encode(conta.getCliente().getSenha());
+
+        conta.getCliente().setSenha(senhaCriptografada);
+
         conta = contaRepository.save(conta);
 
         LOGGER.info(LogBuilder.of()
@@ -54,8 +64,8 @@ public class ContaService {
     }
 
     @Transactional
-    public Conta depositar(Long numeroConta, BigDecimal valor) {
-        Conta conta = buscar(numeroConta);
+    public Conta depositar(String nome, BigDecimal valor) {
+        Conta conta = buscar(nome);
         validarDeposito(conta, valor);
         Historico.deposito(conta, valor);
         conta.depositar(valor);
@@ -113,7 +123,7 @@ public class ContaService {
 
         int pageSize = 2;
 
-        PageRequest pageRequest = PageRequest.of(0, pageSize, Sort.Direction.ASC,"id");
+        PageRequest pageRequest = PageRequest.of(0, pageSize, Sort.Direction.ASC, "id");
         Page<Conta> contas = buscarTodosAtivos(pageRequest);
 
         if (!contas.isEmpty()) {
@@ -129,7 +139,7 @@ public class ContaService {
                 }
 
                 contaRepository.saveAll(contas);
-                pageRequest = PageRequest.of(pageRequest.getPageNumber() + 1, pageSize, Sort.Direction.ASC,"id");
+                pageRequest = PageRequest.of(pageRequest.getPageNumber() + 1, pageSize, Sort.Direction.ASC, "id");
                 contas = buscarTodosAtivos(pageRequest);
             } while (!contas.isEmpty());
 
@@ -156,10 +166,20 @@ public class ContaService {
     }
 
     @Transactional(readOnly = true)
-    public Conta buscar(long idConta) {
-        Optional<Conta> ContOp = contaRepository.buscarPorId(idConta);
+
+    public Conta buscar(String nome) {
+        Optional<Conta> ContOp = contaRepository.buscarPorNomeCliente(nome);
         if (ContOp.isEmpty()) {
-            throw new ContaNaoEncontradaException(idConta);
+            throw new ContaNaoEncontradaException(nome);
+        }
+        return ContOp.get();
+    }
+
+ @Transactional(readOnly = true)
+    public Conta buscar(Long id) {
+        Optional<Conta> ContOp = contaRepository.buscarPorId(id);
+        if (ContOp.isEmpty()) {
+            throw new ContaNaoEncontradaException(id);
         }
         return ContOp.get();
     }

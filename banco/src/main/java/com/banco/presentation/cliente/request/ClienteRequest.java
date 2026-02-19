@@ -15,4 +15,6 @@ public class ClienteRequest {
 
     private String nome;
 
+    private String senha;
+
 }
